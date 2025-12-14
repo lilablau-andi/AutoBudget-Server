@@ -5,6 +5,7 @@ from app.api.v1.api import router as api_v1_router
 from app.core.config import settings
 
 
+
 def create_app() -> FastAPI:
     """
     Application factory.
@@ -41,9 +42,8 @@ def create_app() -> FastAPI:
     # -----------------------------
     # Health Check
     # -----------------------------
-    @app.get("/health", tags=["Health"])
-    async def health_check():
-        return {"status": "ok"}
+    from app.api import health
+    app.include_router(health.router)
 
     return app
 

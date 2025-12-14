@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 
@@ -26,6 +26,6 @@ class ExpenseRead(ExpenseCreate):
     Erbt von ExpenseCreate, aber fügt den `id` und `created_at` hinzu.
     """
     id: int
-    created_at: str
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)  # Ermöglicht die Rückgabe von ORM-Objekten als Response

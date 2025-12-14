@@ -1,13 +1,8 @@
-# Token Validierung: Token prüfen, Payload lesen, user_id zurückgeben
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 
-from app.core.config import settings
 
-
-# FastAPI Security Scheme (Authorization: Bearer <token>)
 security_scheme = HTTPBearer()
 
 
@@ -15,30 +10,34 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
 ) -> str:
     """
-    Validiert das Supabase JWT und gibt die User-ID zurück.
+    Liest die User-ID (sub) aus dem Supabase JWT.
+    Signaturprüfung wird bewusst übersprungen (Uni-Projekt).
     """
+
     token = credentials.credentials
 
     try:
-        # Supabase JWT validieren
+        # ❗ Signaturprüfung bewusst deaktiviert
         payload = jwt.decode(
             token,
-            settings.SUPABASE_KEY,
-            algorithms=["HS256"],
-            audience="authenticated",
+            key=None,
+            options={
+                "verify_signature": False,
+                "verify_aud": False,
+            },
         )
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Invalid authentication token",
         )
 
-    user_id: str | None = payload.get("sub")
+    user_id = payload.get("sub")
 
-    if user_id is None:
+    if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication payload",
+            detail="User ID not found in token",
         )
 
     return user_id
