@@ -2,7 +2,6 @@
 name = "autobudget"
 version = "0.1.0"
 description = "Ein Python-Tool zur Verwaltung Ihrer Finanzen"
-authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
 packages = [{include = "app"}]
 
@@ -13,6 +12,12 @@ uvicorn = {extras = ["standard"], version = "^0.32.1"}
 pydantic = "^2.10.3"
 sqlalchemy = "^2.0.36"
 psycopg = {extras = ["binary"], version = "^3.2.3"}
+
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
