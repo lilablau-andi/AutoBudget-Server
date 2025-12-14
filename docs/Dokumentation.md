@@ -41,7 +41,18 @@ Sammlung der möglichen Features mit Gruppenpriorisierung
 ### Phase 2 - Umgebungsvorbereitung
 
 Vorbereitung der Entwicklungsumgebung:
-Backend Python 3.12, Github: Getrennt Backend & Frontend, Frontend: Next.js
+
+**Tech Stack**
+| Bezeichnung | Beschreibung |
+| ----------- | ----------- |
+| Next.js | Frontend |
+| FastAPI | FastAPI |
+| Supabase Auth | Authentication für Login und Registrierung |
+| Supabase Postgres | Datenbank |
+| RestAPI | Kommunikation Backend Frontend |
+
+**To-Do-Liste**
+Eine To-Do Liste ist [Hier](https://lilablau-docs.notion.site/AutoBudget-2c89867aa30380a4a374de69f62412d5?source=copy_link)
 
 ### Phase 3 - UX Screening
 
