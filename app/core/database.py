@@ -23,15 +23,26 @@ class Base(DeclarativeBase):
 
 engine = create_engine(
     settings.DATABASE_URL,
-    pool_pre_ping=True,   # prüft Verbindungen automatisch
-    echo=False,           # auf True setzen für SQL-Debugging
+
+    # --- Pool-Stabilität ---
+    pool_pre_ping=True,        # prüft Connection vor Nutzung
+    pool_recycle=1800,         # 🔥 zwingend (30 Minuten)
+    pool_size=5,               # Grundpool
+    max_overflow=10,           # Peak-Last
+    pool_timeout=10,           # schneller Fehler statt Hängen
+
+    # --- Debug ---
+    echo=False,
+
+    # --- Netzwerk ---
     connect_args={
-        "connect_timeout": 10,
+        "connect_timeout": 5,
         "keepalives": 1,
         "keepalives_idle": 30,
         "keepalives_interval": 10,
         "keepalives_count": 5,
-    }
+        "application_name": "fastapi-api",  # 🔍 extrem hilfreich in Supabase Logs
+    },
 )
 
 
