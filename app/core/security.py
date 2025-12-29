@@ -20,7 +20,7 @@ def get_current_user(
         # ❗ Signaturprüfung bewusst deaktiviert
         payload = jwt.decode(
             token,
-            key=None,
+            key="",
             options={
                 "verify_signature": False,
                 "verify_aud": False,

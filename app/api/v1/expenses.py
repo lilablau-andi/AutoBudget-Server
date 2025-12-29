@@ -28,7 +28,7 @@ def create_expense(
         user_id=user_id,
         amount=expense_in.amount,
         type=expense_in.type,
-        category=expense_in.category,
+        category_id=expense_in.category_id,
         description=expense_in.description,
         expense_date=expense_in.expense_date,
     )
@@ -88,7 +88,7 @@ def update_expense(
     # Felder aktualisieren
     expense.amount = expense_in.amount
     expense.type = expense_in.type
-    expense.category = expense_in.category
+    expense.category_id = expense_in.category_id
     expense.description = expense_in.description
     expense.expense_date = expense_in.expense_date
 
