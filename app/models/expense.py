@@ -4,11 +4,17 @@
 
 from datetime import date, datetime, timezone
 
-from sqlalchemy import String, Float, Date, DateTime, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Float, Date, DateTime, Integer, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
+
+
+# Avoid circular imports at runtime
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from app.models.category import Category
 
 class Expense(Base):
     """
@@ -47,8 +53,12 @@ class Expense(Base):
 
     category_id: Mapped[int | None] = mapped_column(
         Integer,
+        ForeignKey("categories.id"),
         nullable=True,
     )
+
+    category: Mapped["Category"] = relationship("Category")
+
 
     description: Mapped[str | None] = mapped_column(
         String,

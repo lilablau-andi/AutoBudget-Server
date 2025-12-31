@@ -5,7 +5,7 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.category import Category
-from app.schemas.category import CategoryCreate, CategoryRead
+from app.schemas.category import CategoryCreate, CategoryRead, CategoryUpdate
 
 router = APIRouter()
 
@@ -64,12 +64,12 @@ def list_categories(
 )
 def update_category(
     category_id: int,
-    category_in: CategoryCreate,
+    category_in: CategoryCreate,  # Changed to CategoryCreate for full update
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user),
 ):
     """
-    Aktualisiert eine bestehende Kategorie des aktuellen Users.
+    Überschreibt eine bestehende Kategorie des aktuellen Users (Full Update).
     """
 
     category = db.get(Category, category_id)
@@ -80,9 +80,42 @@ def update_category(
             detail="Category not found",
         )
 
-    # Felder aktualisieren
+    # Bei PUT erwarten wir alle Felder
     category.name = category_in.name
     category.type = category_in.type
+
+    db.commit()
+    db.refresh(category)
+
+    return category
+
+@router.patch(
+    "/{category_id}",
+    response_model=CategoryRead,
+)
+def patch_category(
+    category_id: int,
+    category_in: CategoryUpdate,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+):
+    """
+    Aktualisiert eine bestehende Kategorie des aktuellen Users (Teil-Update).
+    Nur die übergebenen Felder werden geändert.
+    """
+
+    category = db.get(Category, category_id)
+
+    if not category or category.user_id != user_id:
+        raise HTTPException(
+            status_code=404,
+            detail="Category not found",
+        )
+
+    # Nur Felder aktualisieren, die explizit im Body gesendet wurden
+    update_data = category_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(category, key, value)
 
     db.commit()
     db.refresh(category)
