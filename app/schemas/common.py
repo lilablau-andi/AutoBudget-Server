@@ -1,5 +1,11 @@
 from pydantic import BaseModel
 from typing import Generic, TypeVar, List
+from enum import Enum
+
+
+class TransactionType(str, Enum):
+    EXPENSE = "expense"
+    INCOME = "income"
 
 T = TypeVar("T")
 

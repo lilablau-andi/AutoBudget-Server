@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
+from app.schemas.common import TransactionType
 
 
 class CategoryCreate(BaseModel):
@@ -11,9 +12,8 @@ class CategoryCreate(BaseModel):
         description="Name der Kategorie (z. B. Food, Rent, Salary)",
     )
 
-    type: str = Field(
+    type: TransactionType = Field(
         ...,
-        pattern="^(expense|income)$",
         description="Typ der Kategorie ('expense' oder 'income')",
     )
 
@@ -32,9 +32,8 @@ class CategoryUpdate(BaseModel):
         description="Name der Kategorie (z. B. Food, Rent, Salary)",
     )
 
-    type: str | None = Field(
+    type: TransactionType | None = Field(
         None,
-        pattern="^(expense|income)$",
         description="Typ der Kategorie ('expense' oder 'income')",
     )
 
