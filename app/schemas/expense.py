@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import date, datetime
 from typing import Optional, List
-from app.schemas.common import PaginatedResponse
+from app.schemas.common import PaginatedResponse, TransactionType
 
 
 
@@ -15,9 +15,8 @@ class ExpenseCreate(BaseModel):
         description="Betrag der Ausgabe oder Einnahme (größer als 0)",
     )
 
-    type: str = Field(
+    type: TransactionType = Field(
         ...,
-        pattern="^(expense|income)$",
         description="Typ der Transaktion ('expense' oder 'income')",
     )
 
@@ -53,9 +52,8 @@ class ExpenseUpdate(BaseModel):
         description="Betrag der Ausgabe oder Einnahme (größer als 0)",
     )
 
-    type: Optional[str] = Field(
+    type: Optional[TransactionType] = Field(
         None,
-        pattern="^(expense|income)$",
         description="Typ der Transaktion ('expense' oder 'income')",
     )
 
@@ -98,4 +96,31 @@ class ExpensePaginated(PaginatedResponse[ExpenseRead]):
     Schema für die paginierte Rückgabe von Ausgaben.
     """
     pass
+
+
+class ImportedTransaction(BaseModel):
+    """
+    Schema für eine einzelne importierte Transaktion in der Vorschau.
+    """
+    amount: float = Field(..., description="Betrag der Transaktion")
+    type: TransactionType = Field(..., description="Typ: expense oder income")
+    expense_date: date = Field(..., description="Datum der Buchung")
+    description: str = Field(..., description="Verwendungszweck / Beschreibung")
+    category_id: Optional[int] = Field(None, description="Vorgeschlagene oder vom User gewählte Kategorie-ID")
+
+
+class ImportPreview(BaseModel):
+    """
+    Schema für die Antwort der Import-Vorschau.
+    """
+    transactions: List[ImportedTransaction]
+    errors: List[str] = []
+    headers_found: List[str] = []
+
+
+class BatchImportCreate(BaseModel):
+    """
+    Schema für das finale Speichern von mehreren importierten Transaktionen.
+    """
+    transactions: List[ImportedTransaction]
 

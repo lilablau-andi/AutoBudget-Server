@@ -8,7 +8,17 @@ import math
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.expense import Expense
-from app.schemas.expense import ExpenseCreate, ExpenseRead, ExpenseUpdate, ExpensePaginated
+from app.schemas.expense import (
+    ExpenseCreate, 
+    ExpenseRead, 
+    ExpenseUpdate, 
+    ExpensePaginated,
+    TransactionType,
+    ImportPreview,
+    BatchImportCreate
+)
+from app.services.import_service import ImportService
+from fastapi import File, UploadFile
 
 router = APIRouter()
 
@@ -51,6 +61,7 @@ def list_expenses(
     user_id: str = Depends(get_current_user),
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
+    expense_type: Optional[TransactionType] = Query(None, alias="type"),
     category_ids: Optional[list[int]] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=100),
@@ -80,6 +91,9 @@ def list_expenses(
 
     if category_ids:
         stmt = stmt.where(Expense.category_id.in_(category_ids))
+
+    if expense_type:
+        stmt = stmt.where(Expense.type == expense_type)
 
     # Gesamtzahl der Einträge berechnen (vor Pagination)
     count_stmt = select(func.count()).select_from(stmt.subquery())
@@ -197,3 +211,49 @@ def delete_expense(
     db.commit()
 
     return None
+
+
+@router.post(
+    "/import/preview",
+    response_model=ImportPreview,
+)
+def import_preview(
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_current_user),
+):
+    """
+    Liest eine CSV-Datei ein und gibt eine Vorschau der Transaktionen zurück.
+    """
+    content = file.file.read()
+    result = ImportService.parse_csv(content)
+    return result
+
+
+@router.post(
+    "/import/batch",
+    status_code=status.HTTP_201_CREATED,
+)
+def import_batch(
+    import_data: BatchImportCreate,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+):
+    """
+    Speichert mehrere Transaktionen gleichzeitig in die Datenbank.
+    """
+    expenses = []
+    for trans in import_data.transactions:
+        expense = Expense(
+            user_id=user_id,
+            amount=trans.amount,
+            type=trans.type,
+            category_id=trans.category_id,
+            description=trans.description,
+            expense_date=trans.expense_date,
+        )
+        expenses.append(expense)
+
+    db.add_all(expenses)
+    db.commit()
+
+    return {"message": f"{len(expenses)} Transaktionen erfolgreich importiert."}
