@@ -1,3 +1,6 @@
+# Das Budget Schema gibt an wie Kategorien erstellt und gelesen werden
+# Autor: Bastian Holstein
+
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from app.schemas.common import TransactionType
@@ -9,7 +12,7 @@ class CategoryCreate(BaseModel):
     """
     name: str = Field(
         ...,
-        description="Name der Kategorie (z. B. Food, Rent, Salary)",
+        description="Name der Kategorie (z. B. Lebensmittel, Miete, Gehalt)",
     )
 
     type: TransactionType = Field(
@@ -29,7 +32,7 @@ class CategoryUpdate(BaseModel):
     """
     name: str | None = Field(
         None,
-        description="Name der Kategorie (z. B. Food, Rent, Salary)",
+        description="Name der Kategorie (z. B. Lebensmittel, Miete, Einkommen)",
     )
 
     type: TransactionType | None = Field(

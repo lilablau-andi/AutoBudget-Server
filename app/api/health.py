@@ -1,3 +1,6 @@
+# Der Health Endpoint ist eine einfache Datenbank abfrage, die aus /docs ansteuerbar ist, 
+# um die Datenbank Verbindung zu prüfen.
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -17,9 +20,8 @@ def health_check(db: Session = Depends(get_db)):
         db.execute(text("SELECT 1"))
         return {"status": "ok", "database": "online"}
     except Exception as e:
-        # Hier könnte man strukturiertes Logging verwenden
         print(f"Health Check DB Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database unreachable"
+            detail="Database nicht erreichbar"
         )
