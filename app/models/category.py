@@ -1,18 +1,17 @@
-from datetime import date, datetime, timezone
+# Model für die Categories
+# Autor: Bastian Holstein
 
+from datetime import date, datetime, timezone
 from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
-
 from app.core.database import Base
 
-
+# Die Tabelle Kategorien besteht aus id, user_id, Name, Typ (Ausgabe oder Einkommen) und 
+# Erstellungsdatum
 class Category(Base):
-
     __tablename__ = "categories"
 
-    # -------------------------------------------------
-    # Primärschlüssel
-    # -------------------------------------------------
+
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[str] = mapped_column(
         String,

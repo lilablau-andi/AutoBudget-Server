@@ -1,3 +1,6 @@
+# API Endpoint Logik für die Kategorien
+# Autor: Bastian Holstein
+
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -6,10 +9,11 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.category import Category
 from app.schemas.category import CategoryCreate, CategoryRead, CategoryUpdate
+from app.schemas.common import TransactionType
 
 router = APIRouter()
 
-
+# POST Request um eine neue Kategorie anzulegen
 @router.post(
     "/",
     response_model=CategoryRead,
@@ -36,17 +40,20 @@ def create_category(
 
     return category
 
+# GET Request um eine Liste der Kategorien zu bekommen.
+# Optional kann nach dem Typ (Einnahmen oder Ausgaben) gefiltert werden.
 @router.get(
     "/",
     response_model=list[CategoryRead],
 )
 def list_categories(
+    type: TransactionType | None = None,
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user),
 ):
     """
-    Gibt alle Kategorien des aktuellen Users zurück.
-    Sortiert nach Datum (neueste zuerst).
+    Gibt Kategorien des aktuellen Users zurück.
+    Optional kann nach dem Typ gefiltert werden.
     """
 
     stmt = (
@@ -54,17 +61,22 @@ def list_categories(
         .where(Category.user_id == user_id)
     )
 
+    # Wenn Typ angegeben wurde, dann diesen zum ORM Request hinzufügen.
+    if type:
+        stmt = stmt.where(Category.type == type)
+
     categories = db.execute(stmt).scalars().all()
 
     return categories
 
+# PUT Request eine Kategorie zu ändern.
 @router.put(
     "/{category_id}",
     response_model=CategoryRead,
 )
 def update_category(
     category_id: int,
-    category_in: CategoryCreate,  # Changed to CategoryCreate for full update
+    category_in: CategoryCreate, 
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user),
 ):
@@ -89,6 +101,7 @@ def update_category(
 
     return category
 
+# PATCH Request eine Kategorie zu ändern. Patch damit wir nicht jedesmal alle Felder updaten müssen
 @router.patch(
     "/{category_id}",
     response_model=CategoryRead,
@@ -109,7 +122,7 @@ def patch_category(
     if not category or category.user_id != user_id:
         raise HTTPException(
             status_code=404,
-            detail="Category not found",
+            detail="Kategorie nicht gefunden",
         )
 
     # Nur Felder aktualisieren, die explizit im Body gesendet wurden
@@ -122,6 +135,7 @@ def patch_category(
 
     return category
 
+# DELETE Request um eine Kategorie zu löschen
 @router.delete(
     "/{category_id}",
     status_code=status.HTTP_204_NO_CONTENT,
